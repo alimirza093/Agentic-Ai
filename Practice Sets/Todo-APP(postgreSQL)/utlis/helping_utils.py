@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from typing import Optional
-from fastapi import Depends
+from fastapi import Depends , HTTPException
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 import os
@@ -26,6 +26,8 @@ def verify_token(token: str = Depends(oAuth2_scheme)):
         decoded_token = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return decoded_token
     except jwt.ExpiredSignatureError:
-        return None
+        raise HTTPException(status_code=401, detail="Token has expired")
     except jwt.InvalidTokenError:
-        return None
+        raise HTTPException(status_code=401, detail="Invalid token")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

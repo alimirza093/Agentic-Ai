@@ -1,26 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from models.models import User
-from pydantic import BaseModel, EmailStr
 from config.db import get_db
 from utlis.helping_utils import create_access_token
-
+from validations.user_validations import create_User, login_User
 user_router = APIRouter()
 
-class create_User(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
-
-    class Config:
-        orm_mode = True
-
-class login_User(BaseModel):
-    email: EmailStr
-    password: str
-
-    class Config:
-        orm_mode = True
 
 
 @user_router.post("/signup")

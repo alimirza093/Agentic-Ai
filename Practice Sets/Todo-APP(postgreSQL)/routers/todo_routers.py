@@ -2,44 +2,16 @@ from fastapi import APIRouter, Depends, HTTPException
 from config.db import get_db
 from sqlalchemy.orm import Session, joinedload
 from models.models import Todo
-from pydantic import BaseModel, EmailStr
 from utlis.helping_utils import verify_token
+from validations.todo_validations import create_Todo
+
+
 todo_router = APIRouter()
-
-
-class create_Todo(BaseModel):
-    title: str
-    description: str
-    completed: bool
-
-    class Config:
-        orm_mode = True
-
-class UserResponse(BaseModel):
-    id: int
-    username: str
-    email: EmailStr
-
-    class Config:
-        orm_mode = True
-
-class TodoResponse(BaseModel):
-    id: int
-    title: str
-    description: str
-    completed: bool
-    user_id: int
-    datetime: str
-    user: UserResponse
-    class Config:
-        orm_mode = True
 
 
 @todo_router.post("/post")
 def create_todo(todo: create_Todo, user = Depends(verify_token), db: Session = Depends(get_db)):
     try:
-        if not user:
-            raise HTTPException(status_code=401, detail="Invalid or expired token")
         user_id = user.get("user_id")
         new_todo = Todo(
             title=todo.title,
@@ -66,8 +38,6 @@ def create_todo(todo: create_Todo, user = Depends(verify_token), db: Session = D
 @todo_router.get("/get")
 def get_todos(user = Depends(verify_token) ,db: Session = Depends(get_db)):
     try:
-        if not user:
-            raise HTTPException(status_code=401, detail="Invalid or expired token")
         todos = db.query(Todo).all()
         return{
             "message": "Todos retrieved successfully",
@@ -80,10 +50,9 @@ def get_todos(user = Depends(verify_token) ,db: Session = Depends(get_db)):
 @todo_router.get("/get/{id}")
 def get_todo_by_id(id: int, user = Depends(verify_token), db: Session = Depends(get_db)):
     try:
-        if not user:
-            raise HTTPException(status_code=401, detail="Invalid or expired token")
         full_todo = db.query(Todo).options(joinedload(Todo.user)).filter(Todo.id == id).first()
-
+        if full_todo and full_todo.user:
+            full_todo.user.password = None  # Remove password from the response
         if not full_todo:
             raise HTTPException(status_code=404, detail="Todo not found")
         return {
@@ -97,8 +66,6 @@ def get_todo_by_id(id: int, user = Depends(verify_token), db: Session = Depends(
 @todo_router.put("/update/{id}")
 def update_todo(id: int , todo: create_Todo ,user = Depends(verify_token), db: Session = Depends(get_db)):
     try:
-        if not user:
-            raise HTTPException(status_code=401, detail="Invalid or expired token")
         existing_todo = db.query(Todo).filter(Todo.id == id).first()
 
         if not existing_todo:
@@ -122,11 +89,9 @@ def update_todo(id: int , todo: create_Todo ,user = Depends(verify_token), db: S
             raise HTTPException(status_code=500, detail=str(e))
             
 
-@todo_router.delete("/todos/delete/{id}")
+@todo_router.delete("/delete/{id}")
 def delete_todo(id: int,user = Depends(verify_token), db: Session = Depends(get_db)):
     try:
-        if not user:
-            raise HTTPException(status_code=401, detail="Invalid or expired token")
         existing_todo = db.query(Todo).filter(Todo.id == id).first()
 
         if not existing_todo:
