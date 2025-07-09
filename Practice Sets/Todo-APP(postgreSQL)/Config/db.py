@@ -3,6 +3,14 @@ from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 load_dotenv()
 
 db_url = os.getenv("DATABASE_URL")
