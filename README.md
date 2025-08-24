@@ -15,6 +15,7 @@ Each folder in the `course/` directory covers a core concept of FastAPI:
 - 📁 `05_database_mongo_postgres/` – Connecting FastAPI with MongoDB & PostgreSQL
 - 📁 `06_JWT Authentication/` – Performing tasks like login user and signup User using JWT Authentication
 - 📁 `07_API Authentication/` – Authenticating user with API Authentication
+- 📁 `08_Data_Preprocessing/` – Preprocss Data befor model development
 
 ---
 
@@ -26,6 +27,7 @@ Practical API sets for hands-on experience in `practice_sets/`:
 - Student Result API
 - University Registration API
 - Notepad App using PostgreSQL and JWT Authentication
+- Cat vs Dog AI Model using CNN (Tensorflow & Keras)
 
 ---
 
